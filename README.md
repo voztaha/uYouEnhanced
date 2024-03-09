@@ -274,7 +274,7 @@
 
 ## Download
 
-- ~The latest version of **uYouEnhanced** can be found under [Releases](https://github.com/arichornlover/uYouEnhanced/releases/latest).~
+- The latest version of **uYouEnhanced** can be found under [Releases](https://github.com/arichornlover/uYouEnhanced/releases/latest).
 - **Compatibility:** Requires iOS/iPadOS 14.0 or later.
 - For AltStore user: 
 
