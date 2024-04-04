@@ -20,12 +20,15 @@ jobs:
 
       - name: Add uYouEnhanced submodules
         run: |
-//        git submodule add https://github.com/PoomSmart/FLEXing.git Tweaks/FLEXing
+#         git submodule add https://github.com/PoomSmart/FLEXing.git Tweaks/FLEXing
           git submodule add https://github.com/dayanch96/uYouLocalization.git Tweaks/uYouLocalization
-          git submodule add https://github.com/arichorn/YTHoldForSpeed.git Tweaks/YTHoldForSpeed
+          git submodule add https://github.com/arichornlover/YTHoldForSpeed.git Tweaks/YTHoldForSpeed
+          git submodule add https://github.com/arichornlover/YouGroupSettings.git Tweaks/YouGroupSettings
           git add .
           git commit -m "added uYouEnhanced submodules"
           git push origin
+
+# ⬇️ this is for updating the submodules all at once. it's not recommended for use due to errors.
 
 #     - name: Update submodules
 #       run: |
@@ -35,6 +38,8 @@ jobs:
 #         git push origin
 #       continue-on-error: true
 
+# ⬇️ this is the current method of updating the submodules for uYouEnhanced
+
       - name: Update submodules
         run: |
           git submodule update --init --recursive --remote Tweaks/Alderis
@@ -42,8 +47,6 @@ jobs:
           git submodule update --init --recursive --remote Tweaks/DontEatMyContent
           git add .
           git submodule update --init --recursive --remote Tweaks/YTHoldForSpeed
-          git add .
-          git submodule update --init --recursive --remote Tweaks/MrBeastify
           git add .
           git submodule update --init --recursive --remote Tweaks/PSHeader
           git add .
@@ -63,6 +66,8 @@ jobs:
           git add .
           git submodule update --init --recursive --remote Tweaks/YouQuality
           git add .
+          git submodule update --init --recursive --remote Tweaks/YouGroupSettings
+          git add .
           git submodule update --init --recursive --remote Tweaks/YouTubeHeader
           git add .
           git submodule update --init --recursive --remote Tweaks/iSponsorBlock
@@ -71,15 +76,31 @@ jobs:
           git push origin
         continue-on-error: true
 
+# ⬇️ this is required for adding custom submodule(s) that include a .bundle file. it is recommended for use.
+
       - name: Make .bundle files
         run: |
           cd Bundles
           ln -s ../Tweaks/MrBeastify/layout/Library/Application\ Support/MrBeastify.bundle MrBeastify.bundle
           ln -s ../Tweaks/uYouLocalization/layout/Library/Application\ Support/uYouLocalization.bundle uYouLocalization.bundle
           ln -s ../Tweaks/YTHoldForSpeed/layout/Library/Application\ Support/YTHoldForSpeed.bundle YTHoldForSpeed.bundle
+          ln -s ../Tweaks/YouGroupSettings/layout/Library/Application\ Support/YouGroupSettings.bundle YouGroupSettings.bundle
           git add .
           git commit -m "Added bundles"
           git push origin
+
+# ⬇️ this is only necessary if you want to delete .bundle files if you planned on removing submodule(s) or your custom submodule(s).
+
+#     - name: Delete .bundle files
+#       run: |
+#         cd Bundles
+#         rm -f MrBeastify.bundle
+#         rm -f uYouLocalization.bundle
+#         rm -f YTHoldForSpeed.bundle
+#         rm -f YouGroupSettings.bundle
+#         git add .
+#         git commit -m "Deleted bundles"
+#         git push origin
 
       - name: Check exit code
         run: |
