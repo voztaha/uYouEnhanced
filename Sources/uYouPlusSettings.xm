@@ -107,6 +107,19 @@ extern NSBundle *uYouPlusBundle();
     ];
     [sectionItems addObject:bug];
 
+    YTSettingsSectionItem *developers = [%c(YTSettingsSectionItem)
+        itemWithTitle:LOC(@"Support the Developers")
+        titleDescription:LOC(@"MiRO92, PoomSmart, level3tjg, BandarHL, julioverne & Galactic-dev")
+        accessibilityIdentifier:nil
+        detailTextBlock:^NSString *() {
+            return nil;
+        }
+        selectBlock:^BOOL (YTSettingsCell *cell, NSUInteger arg1) {
+            return [%c(YTUIUtils) openURL:[NSURL URLWithString:@"https://github.com/arichornlover/uYouEnhanced/blob/main/README.md#support-the-developers"]];
+        }
+    ];
+    [sectionItems addObject:developers];
+
     YTSettingsSectionItem *exitYT = [%c(YTSettingsSectionItem)
         itemWithTitle:LOC(@"QUIT_YOUTUBE")
         titleDescription:nil
@@ -305,7 +318,9 @@ YTSettingsSectionItem *lowContrastMode = [YTSettingsSectionItemClass
                 return NO;
             }
         }
-        [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:@"lowContrastMode_enabled"];
+        if (IS_ENABLED(@"fixLowContrastMode_enabled")) {
+            [[NSUserDefaults standardUserDefaults] setBool:YES forKey:@"lowContrastMode_enabled"];
+        }
         [settingsViewController reloadData];
         SHOW_RELAUNCH_YT_SNACKBAR;
         return YES;

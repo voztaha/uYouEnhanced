@@ -52,7 +52,14 @@ static int contrastMode() {
 }
 %end
 
-// Workaround: uYou 3.0.3 Adblock fix.
+// Enable Alternate Icons
+%hook UIApplication
+- (BOOL)supportsAlternateIcons {
+    return YES;
+}
+%end
+
+// Workaround: uYou 3.0.3 Adblock fix - @PoomSmart
 %hook YTAdsInnerTubeContextDecorator
 - (void)decorateContext:(id)context {
 if ([NSUserDefaults.standardUserDefaults boolForKey:@"removeYouTubeAds"]) {}
@@ -313,7 +320,7 @@ BOOL isAd(YTIElementRenderer *self) {
 - (BOOL)enablePlayerBarForVerticalVideoWhenControlsHiddenInFullscreen { return YES; }
 %end
 
-// YTNoTracking - @arichornlover - https://github.com/arichornlover/YTNoTracking/
+// YTNoTracking - @arichornlover - https://github.com/arichornlover/YTNoTracking/ - OUTDATED
 %hook UIApplication
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options {
     NSString *originalURLString = [url absoluteString];
@@ -622,17 +629,15 @@ BOOL isAd(YTIElementRenderer *self) {
 }
 %end
 
-/* DISABLED
 // Hide double tap to seek overlay - @arichornlover
 %hook YTInlinePlayerDoubleTapIndicatorView
 - (void)layoutSubviews {
     %orig;
     if (IS_ENABLED(@"hideDoubleTapToSeekOverlay_enabled")) {
-        self._scrimOverlay.backgroundColor = [UIColor clearColor];
+        self.scrimOverlay.backgroundColor = [UIColor clearColor];
     }
 }
 %end
-*/
 
 // Video Controls Overlay Options
 // Hide CC / Hide Autoplay switch / Hide YTMusic Button / Enable Share Button / Enable Save to Playlist Button
@@ -691,7 +696,7 @@ BOOL isAd(YTIElementRenderer *self) {
 }
 %end
 
-// Hide Fullscreen Button - @arichornlover - YouQuality is Incompatibile with this Option
+// Hide Fullscreen Button - @arichornlover - PoomSmart's YouQuality tweak breaks when enabling this
 %hook YTInlinePlayerBarContainerView
 - (void)layoutSubviews {
     %orig; 
@@ -958,7 +963,7 @@ BOOL isAd(YTIElementRenderer *self) {
 }
 %end
 
-// Hide the (Connect / Thanks / Save / Report) Buttons under the Video Player - 17.x.x and up - @PoomSmart (inspired by @arichornlover) DEPRECATED METHOD ⚠️
+// Hide the (Connect / Thanks / Save / Report) Buttons under the Video Player - 17.x.x and up - @arichornlover (inspired by @PoomSmart's version) DEPRECATED METHOD ⚠️
 %hook _ASDisplayView
 - (void)layoutSubviews {
     %orig;
@@ -1237,7 +1242,7 @@ static BOOL findCell(ASNodeController *nodeController, NSArray <NSString *> *ide
 %end
 %end
 
-// Hide Indicators - @Dayanch96 & @arichorn
+// Hide Indicators - @Dayanch96 & @arichornlover
 %group gHideSubscriptionsNotificationBadge
 %hook YTPivotBarIndicatorView
 - (void)didMoveToWindow {
