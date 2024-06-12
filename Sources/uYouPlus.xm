@@ -14,19 +14,6 @@ NSBundle *uYouPlusBundle() {
     return bundle;
 }
 NSBundle *tweakBundle = uYouPlusBundle();
-
-// uYouPlusSettings.xm
-static int contrastMode() {
-    NSString *appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-    NSComparisonResult result1 = [appVersion compare:@"17.33.2" options:NSNumericSearch];
-    NSComparisonResult result2 = [appVersion compare:@"17.38.10" options:NSNumericSearch];
-
-    if (result1 != NSOrderedAscending && result2 != NSOrderedDescending) {
-        return [[NSUserDefaults standardUserDefaults] integerForKey:@"lcm"];
-    } else {
-        return 0;
-    }
-}
 //
 
 # pragma mark - Other hooks
@@ -51,19 +38,7 @@ static int contrastMode() {
 }
 %end
 
-// Fixes uYou crash when trying to play video (#1422)
-@interface YTVarispeedSwitchController : NSObject
-@end
-
-@interface YTPlayerOverlayManager : NSObject
-@property (nonatomic, assign) float currentPlaybackRate;
-@property (nonatomic, strong, readonly) YTVarispeedSwitchController *varispeedController;
-
-- (void)varispeedSwitchController:(YTVarispeedSwitchController *)varispeed didSelectRate:(float)rate;
-- (void)setCurrentPlaybackRate:(float)rate;
-- (void)setPlaybackRate:(float)rate;
-@end
-
+// Fixes uYou crash when trying to play video (qnblackcat/#1422) - @Dayanch96
 %hook YTPlayerOverlayManager
 %property (nonatomic, assign) float currentPlaybackRate;
 
@@ -162,6 +137,7 @@ BOOL isAdString(NSString *description) {
         || [description containsString:@"text_search_ad"]
         || [description containsString:@"expandable_list"]
         || [description containsString:@"expandable_metadata"]
+        || [description containsString:@"video_display_full_layout"]
         || [description containsString:@"video_display_full_buttoned_layout"])
         return YES;
     return NO;
@@ -551,27 +527,6 @@ NSData *cellDividerData;
 - (BOOL)enablePlayerBarForVerticalVideoWhenControlsHiddenInFullscreen { return YES; }
 %end
 
-// YTNoTracking - @arichornlover - https://github.com/arichornlover/YTNoTracking/
-%hook UIPasteboard
-- (void)setString:(NSString *)string {
-    // Check if the shared string is a YouTube URL
-    if ([string containsString:@"youtu"]) {
-        NSError *error = NULL;
-        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"youtu\\.be\\/(\\w+)" options:NSRegularExpressionCaseInsensitive error:&error];
-        NSArray *matches = [regex matchesInString:string options:0 range:NSMakeRange(0, [string length])]; 
-        for (NSTextCheckingResult *match in matches) {
-            NSRange videoIDRange = [match rangeAtIndex:1];
-            NSString *videoID = [string substringWithRange:videoIDRange];
-            NSRange timeRange = [string rangeOfString:@"t=" options:NSBackwardsSearch];
-            NSString *sanitizedURL = [NSString stringWithFormat:@"https://youtu.be/%@%@", videoID, [string substringFromIndex:timeRange.location]];
-            %orig(sanitizedURL);
-            return;
-        }
-    } 
-    %orig(string);
-}
-%end
-
 // YTNoPaidPromo: https://github.com/PoomSmart/YTNoPaidPromo
 %hook YTMainAppVideoPlayerOverlayViewController
 - (void)setPaidContentWithPlayerData:(id)data {
@@ -591,7 +546,31 @@ NSData *cellDividerData;
 }
 %end
 
+// Classic Video Player (Restores the v16.xx.x Video Player Functionality) - @arichornlover
+// To-do: disabling "Precise Video Scrubbing" https://9to5google.com/2022/06/29/youtube-precise-video-scrubbing/
+%group gClassicVideoPlayer
+%hook YTColdConfig
+- (BOOL)isPinchToEnterFullscreenEnabled { return YES; } // Restore Pinch-to-fullscreen
+- (BOOL)deprecateTabletPinchFullscreenGestures { return NO; } // Restore Pinch-to-fullscreen
+%end
+%hook YTHotConfig
+- (BOOL)isTabletFullscreenSwipeGesturesEnabled { return NO; } // Disable Swipe-to-fullscreen (iPad)
+%end
+%end
+
 // Fix LowContrastMode - @arichornlover
+static int contrastMode() {
+    NSString *appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
+    NSComparisonResult result1 = [appVersion compare:@"17.33.2" options:NSNumericSearch];
+    NSComparisonResult result2 = [appVersion compare:@"17.38.10" options:NSNumericSearch];
+
+    if (result1 != NSOrderedAscending && result2 != NSOrderedDescending) {
+        return [[NSUserDefaults standardUserDefaults] integerForKey:@"lcm"];
+    } else {
+        return 0;
+    }
+}
+
 %group gFixLowContrastMode
 %hook NSUserDefaults
 - (NSInteger)integerForKey:(NSString *)defaultName {
@@ -1671,6 +1650,9 @@ static BOOL findCell(ASNodeController *nodeController, NSArray <NSString *> *ide
     }
     if (IS_ENABLED(@"noVideosInFullscreen_enabled")) {
         %init(gNoVideosInFullscreen);
+    }
+    if (IS_ENABLED(@"classicVideoPlayer_enabled")) {
+        %init(gClassicVideoPlayer);
     }
     if (IS_ENABLED(@"fixLowContrastMode_enabled")) {
         %init(gFixLowContrastMode);
